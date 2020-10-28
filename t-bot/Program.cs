@@ -163,6 +163,7 @@ namespace penitto
             int Sep1;
             int Sep2;
             bool RNDbool;
+            bool RNDbool1;
             StreamReader sr = new StreamReader(CfgFile);
             while ((line = sr.ReadLine()) != null)
             {
@@ -176,6 +177,12 @@ namespace penitto
                     RNDbool = true;
                 }
                 else RNDbool = false;
+
+                if (RNDorNot == "")
+                {
+                    RNDbool1 = true;
+                }
+                else RNDbool1 = false;
                 //ConLog.ConLogWrite("Ищем: " + Ask + " В файле: " + FileName + " Случайно(ДА/НЕТ): " + RNDorNot);
                 if (MsgText.Contains(Ask) && RNDbool)
                 {
@@ -189,30 +196,36 @@ namespace penitto
                     line = OneLineAnswer.One(FileName);
                     break;
                 }
-                if (MsgText.Contains("/azk"))
+                if (MsgText.Contains(Ask) && RNDbool1)
                 {
-
-                    string AZKFileinfo = "c:\\t-bot\\azkinfo.txt";
-                    string line2;
-                    string TrLine = "";
-                    string TrLine1;
-                    StreamReader sr3 = new StreamReader(AZKFileinfo);
-                    while ((line2 = sr3.ReadLine()) != null)
-                    {
-                        if (line2.Contains(MsgText))
-                        {
-                            TrLine1 = line2.Substring(7);
-                            TrLine = TrLine1.Replace("&&", "\n");
-                            break;
-                        }
-                        else TrLine = "Неверный номер АЗК!!!!1";
-                    }
-                    sr3.Close();
-                    ConLog.ConLogWrite("Требуемый ответ из файла " + AZKFileinfo + " на запрос: " + MsgText);
-                    line = TrLine;
-
+                    ConLog.ConLogWrite("Выборочный ответ из файла " + FileName + " на запрос: " + MsgText + ", номерстроки:");
+                    line = TargetAnswer.TargetLine(1, FileName);
                     break;
                 }
+                //if (MsgText.Contains("/azk"))
+                //{
+                //
+                //    string AZKFileinfo = "c:\\t-bot\\azkinfo.txt";
+                //    string line2;
+                //    string TrLine = "";
+                //    string TrLine1;
+                //    StreamReader sr3 = new StreamReader(AZKFileinfo);
+                //    while ((line2 = sr3.ReadLine()) != null)
+                //    {
+                //        if (line2.Contains(MsgText))
+                //        {
+                //            TrLine1 = line2.Substring(7);
+                //            TrLine = TrLine1.Replace("&&", "\n");
+                //            break;
+                //        }
+                //        else TrLine = "Неверный номер АЗК!!!!1";
+                //    }
+                //    sr3.Close();
+                //    ConLog.ConLogWrite("Требуемый ответ из файла " + AZKFileinfo + " на запрос: " + MsgText);
+                //    line = TrLine;
+                //
+                //    break;
+                //}
             }
             sr.Close();
             return line;
@@ -255,6 +268,32 @@ namespace penitto
             return TrLine;
         }
     }
+
+    class TargetAnswer
+    {
+        public static string TargetLine(int NumLineReq, string TargetFileName)
+        {
+            string TargetFileinfo = ("c:\\t-bot\\" + TargetFileName);
+            string line;
+            //string TrLine = "";
+            //string TrLine1;
+            int s = 0;
+            StreamReader sr = new StreamReader(TargetFileinfo);
+            while ((line = sr.ReadLine()) != null)
+            {
+                //Console.WriteLine(line);
+                s++;
+                if (s == NumLineReq)
+                {
+                    break;
+                }
+                else line = "Неверный номер строки!!!!1";
+            }
+            sr.Close();
+            return line;
+        }
+    }
+
     class RNDAnswer
     {
         public static string troll(string RNDFileName)
