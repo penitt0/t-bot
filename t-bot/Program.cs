@@ -156,22 +156,13 @@ namespace penitto
         {
             string CfgFile = "c:\\t-bot\\t-bot.cfg";
             string line;
-//            string Ask = "";
-//            string FileName = "";
-//            string RNDorNot = "";
-//            string ConfOpt = "";
             char Dev1 = ':';
             char Dev2 = '$';
             int Sep1;
             int Sep2;
-//            string CountTest;
             ushort LineNum;
-//            byte ConfOpt;
-//            bool RNDbool;
-//            bool RNDbool1;
             StreamReader sr = new StreamReader(CfgFile);
             while ((line = sr.ReadLine()) != null)
-            //            while ((line = sr.ReadLine()) != null && (!line.Contains("//")))
             {
                 if (!line.Contains("//"))
                 {
@@ -179,24 +170,17 @@ namespace penitto
                     Sep2 = line.IndexOf(Dev2);
                     string Ask = line.Substring(0, Sep1);
                     string FileName = line.Substring(Sep1 + 1, line.Length - Sep1 - 3);
-                    //                string RNDorNot = line.Substring(Sep2 + 1, 1);
                     string ConfOpt = line.Substring(Sep2 + 1, 1);
-                    //                if (RNDorNot == "1")
-                    //                {
-                    //                    RNDbool = true;
-                    //                }
-                    //                else RNDbool = false;
-                    //ConLog.ConLogWrite("Ищем: " + Ask + " В файле: " + FileName + " Случайно(ДА/НЕТ): " + RNDorNot);
                     if (MsgText.Contains(Ask) && (ConfOpt == "1"))
                     {
                         ConLog.ConLogWrite("Случайный ответ из файла " + FileName + " на запрос: " + MsgText);
-                        line = RNDAnswer.Troll(FileName);
+                        line = BotAnswer.Troll(FileName);
                         break;
                     }
                     if (MsgText.Contains(Ask) && (ConfOpt == "0"))
                     {
                         ConLog.ConLogWrite("Единичный ответ из файла " + FileName + " на запрос: " + MsgText);
-                        line = OneLineAnswer.One(FileName);
+                        line = BotAnswer.One(FileName);
                         break;
                     }
                     if (MsgText.Contains(Ask) && ConfOpt == "2" && (MsgText.Length < (Ask.Length + 3)))
@@ -215,44 +199,42 @@ namespace penitto
                         {
                             LineNum = ushort.Parse(MsgText.Substring(Ask.Length, 3));
                             ConLog.ConLogWrite("Выборочный ответ из файла " + FileName + " на запрос: " + MsgText + ", номер строки: " + LineNum);
-                            line = TargetAnswer.TargetLine(LineNum, FileName);
+                            line = BotAnswer.TargetLine(LineNum, FileName);
                             break;
                         }
                     }
-
-                    //if (MsgText.Contains("/azk"))
-                    //{
-                    //
-                    //    string AZKFileinfo = "c:\\t-bot\\azkinfo.txt";
-                    //    string line2;
-                    //    string TrLine = "";
-                    //    string TrLine1;
-                    //    StreamReader sr3 = new StreamReader(AZKFileinfo);
-                    //    while ((line2 = sr3.ReadLine()) != null)
-                    //    {
-                    //        if (line2.Contains(MsgText))
-                    //        {
-                    //            TrLine1 = line2.Substring(7);
-                    //            TrLine = TrLine1.Replace("&&", "\n");
-                    //            break;
-                    //        }
-                    //        else TrLine = "Неверный номер АЗК!!!!1";
-                    //    }
-                    //    sr3.Close();
-                    //    ConLog.ConLogWrite("Требуемый ответ из файла " + AZKFileinfo + " на запрос: " + MsgText);
-                    //    line = TrLine;
-                    //
-                    //    break;
-                    //}
+                    if (MsgText.Contains(Ask) && ConfOpt == "3")
+                    {
+                        string FindKey;
+                        string Patt;
+                        Patt = @"\s\w+";
+                        
+                        Regex CutLine = new Regex(Patt);
+                        Match match = CutLine.Match(MsgText);
+                        //ConLog.ConLogWrite("ЧТО НАШЕЛ:"+match.Value+":"+match.Length+":");
+                        //FindKey = MsgText.Substring(Ask.Length+1, Ask.Length+match.Length-1);
+                        //FindKey = match.Value.Substring(1, match.Value.Length-1);
+                        if (match.Value == "") 
+                        {
+                            line = ("Неверный формат запроса. Используй: /" + Ask + "[пробел]искомая_строка");
+                            ConLog.ConLogWrite("Неверный формат запроса. Используй: /" + Ask + "[пробел]искомая_строка");
+                            break;
+                        }
+                        else
+                        {
+                            FindKey = match.Value.Substring(1, match.Value.Length-1);
+                            ConLog.ConLogWrite("Поиск строки в файле " + FileName + " по ключу " + FindKey + ", на запрос: " + MsgText);
+                            line = BotAnswer.FindByKey(FileName, FindKey);
+                            break;
+                        }
+                    }
                 }
-//                else    ConLog.ConLogWrite("пропущена строка конфига с каментом: " + line);
             }
                 sr.Close();
             return line;
         }
-    }
-    class OneLineAnswer
-    {
+
+
         public static string One(string OneLineFileName)
         {
             string HelpFilele = ("c:\\t-bot\\" + OneLineFileName);
@@ -264,39 +246,10 @@ namespace penitto
             sr5.Close();
             return TrLine;
         }
-    }
-    class AZKAnswer
-    {
-        public static string AZKinfo(string AZKinfoReq)
-        {
-            string AZKFileinfo = "c:\\t-bot\\azkinfo.txt";
-            string line;
-            string TrLine = "";
-            string TrLine1;
-            StreamReader sr = new StreamReader(AZKFileinfo);
-            while ((line = sr.ReadLine()) != null)
-            {
-                if (line.Contains(AZKinfoReq))
-                {
-                    TrLine1 = line.Substring(7);
-                    TrLine = TrLine1.Replace("&&", "\n");
-                    break;
-                }
-                else TrLine = "Неверный номер АЗК!!!!1";
-            }
-            sr.Close();
-            return TrLine;
-        }
-    }
-    
-    class TargetAnswer
-    {
         public static string TargetLine(ushort NumLineReq, string TargetFileName)
         {
             string TargetFileinfo = ("c:\\t-bot\\" + TargetFileName);
             string line;
-            //string TrLine = "";
-            //string TrLine1;
             ushort s = 0;
             StreamReader sr = new StreamReader(TargetFileinfo);
             while ((line = sr.ReadLine()) != null)
@@ -312,10 +265,7 @@ namespace penitto
             sr.Close();
             return line;
         }
-    }
 
-    class RNDAnswer
-    {
         public static string Troll(string RNDFileName)
         {
             string RNDFilePath = "c:\\t-bot\\";
@@ -339,7 +289,36 @@ namespace penitto
             sr2.Close();
             return line;
         }
+
+
+        public static string FindByKey(string BdFileName, string FindKey)
+        {
+            string BDFilePath = "c:\\t-bot\\" + BdFileName;
+            int Ind;
+            string line;
+            StreamReader sr6 = new StreamReader(BDFilePath);
+            while ((line = sr6.ReadLine()) != null)
+            {
+                    if (line.Contains(FindKey + "::"))
+                    {
+                    Ind = line.IndexOf("::");
+                    line = line.Substring(Ind+2);
+                    line = line.Replace("&&", "\n");
+                    break;
+                    }
+                            
+            }
+            if (line == null) 
+                line = "Запись в базе не найдена! попробуй еще раз. ;)";
+            sr6.Close();
+            return line;
+        }
+
+
     }
+
+
+
     class ConLog
     {
         public static void ConLogWrite(string info)
@@ -351,7 +330,7 @@ namespace penitto
     {
         static void Main(string[] args)
         {
-            ConLog.ConLogWrite("T-Bot by Penitto v 0.05 alpha");
+            ConLog.ConLogWrite("T-Bot by Penitto v 0.06 alpha");
             Bot bot = new Bot();
             for (int i = 0; i < 5000; i++)
             {
